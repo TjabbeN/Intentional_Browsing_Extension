@@ -99,6 +99,11 @@
       "description": "Close archive.org item pages that are flagged (noindex or darkened in metadata, a content warning on the page, or a match in archiveOrgTerms). Default: false.",
       "type": "boolean"
     },
+    "mentionCheck": {
+      "title": "Close pages that name a blocked site",
+      "description": "Close pages whose address names a blocked site in its path, query or fragment, such as lists of similar sites, site statistics, domain marketplaces and downloaders. Checked against blockedSites, the sites added in the popup and the remote lists. Explicitly allowed destinations are exempt. Default: false.",
+      "type": "boolean"
+    },
     "pageCheck": {
       "title": "Check page labels, titles and descriptions",
       "description": "Close pages that label themselves as adult content, and pages whose tab title or description matches keywordsAnywhere or keywordsSubstring. Explicitly allowed destinations are exempt. Default: false.",

@@ -412,6 +412,43 @@ function isRemoteBlocked(url) {
   return hostInSet(urlHost(url), remoteDomains);
 }
 
+// ─── Pages about a blocked site (mentionCheck) ──────────────────────────────
+// Pages that exist to lead to a site often name it in their own URL: lists of
+// similar sites, site statistics, domain marketplaces, downloaders. With
+// mentionCheck on, every domain named in a URL's path, query or fragment is
+// checked against the same block lists as the URL itself.
+const EMBEDDED_DOMAIN_RE = /(?:^|[^a-z0-9.-])((?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24})(?=$|[^a-z0-9-])/g;
+
+/** Domains named in the path, query and fragment of a parsed URL. */
+function embeddedDomains(u) {
+  const texts = u.pathname.split('/').filter(Boolean);
+  for (const [, v] of u.searchParams) if (v) texts.push(v);
+  if (u.hash.length > 1) texts.push(u.hash.slice(1));
+  const found = new Set();
+  for (let text of texts) {
+    try { text = decodeURIComponent(text); } catch {}
+    for (const m of text.toLowerCase().matchAll(EMBEDDED_DOMAIN_RE)) {
+      found.add(normalizeHost(m[1]));
+    }
+  }
+  return found;
+}
+
+/** The blocked domain a URL names, or '' when it names none. */
+function blockedMention(url) {
+  if (!config.mentionCheck) return '';
+  const u = tryParseUrl(url);
+  if (!u || !/^https?:$/.test(u.protocol)) return '';
+  const own = normalizeHost(u.hostname);
+  for (const domain of embeddedDomains(u)) {
+    // A site naming itself or its own subdomains is not a mention.
+    if (domain === own || own.endsWith('.' + domain) || domain.endsWith('.' + own)) continue;
+    const target = 'https://' + domain + '/';
+    if (isManagedBlocked(target) || isUserBlocked(target) || isRemoteBlocked(target)) return domain;
+  }
+  return '';
+}
+
 // ─── Sites added from the popup (add-only) ──────────────────────────────────
 // Stored in chrome.storage.sync under `userBlockedSites`. Each entry blocks the
 // domain and all its subdomains. The popup can only add entries.
@@ -621,6 +658,7 @@ function blockReason(rawUrl) {
     if (isUserBlocked(u)) return 'userBlockedSites';
     if (isRemoteBlocked(u)) return 'blocklistUrls';
     if (!targetAllowed && containsKeywordTrigger(u)) return 'keyword';
+    if (!targetAllowed && blockedMention(u)) return 'mentionCheck';
     if (lockdown) {
       if (isLockdownExtraBlocked(u)) return 'lockdownExtraSites';
       if (containsSoftTrigger(u)) return 'keywordsSoft (lockdown)';
