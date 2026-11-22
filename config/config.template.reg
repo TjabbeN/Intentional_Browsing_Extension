@@ -26,6 +26,7 @@ Windows Registry Editor Version 5.00
 "scrubHistory"=dword:00000001
 "archiveOrgCheck"=dword:00000000
 "pageCheck"=dword:00000000
+"mentionCheck"=dword:00000000
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Vivaldi\3rdparty\extensions\<EXTENSION-ID>\policy\blockedSites]
 "1"="example.com"

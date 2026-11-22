@@ -1,11 +1,11 @@
 {
   "name": "intentional-browsing-extension",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "private": true,
   "description": "Development tools for the Intentional Browsing browser extension. The extension itself is in extension/.",
   "license": "GPL-3.0-only",
   "scripts": {
-    "test": "node tests/keywords.test.js && node tests/page-check.test.js && node tests/content.test.js && node tests/overlay.test.js && node tests/popup.test.js",
+    "test": "node tests/keywords.test.js && node tests/page-check.test.js && node tests/content.test.js && node tests/overlay.test.js && node tests/popup.test.js && node tests/mention.test.js",
     "build": "npm test && node tools/build.js",
     "check:fuzzy": "node tools/check-fuzzy-words.js"
   },

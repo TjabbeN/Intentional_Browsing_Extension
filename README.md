@@ -63,6 +63,7 @@ silent: nothing shows when it starts or how long it lasts.
 - Remove blocked pages from history.
 - Close flagged archive.org items.
 - Check pages by their adult-content labels, tab title and description.
+- Close pages whose address names a blocked site.
 
 When no managed configuration is present, only the delay sites and the sites
 added in the popup are active. The popup then shows "No managed configuration
@@ -95,6 +96,7 @@ Changes apply immediately, without a browser restart.
 | `scrubHistory` | boolean | Delete closed pages from history. Default `true`. | `true` |
 | `archiveOrgCheck` | boolean | Close archive.org items that are flagged in their metadata (noindex, darkened, or an `archiveOrgTerms` match) or that show a content warning. Default `false`. | `true` |
 | `pageCheck` | boolean | Close pages that carry an adult-content label, or whose tab title or description matches `keywordsAnywhere` or `keywordsSubstring`. Default `false`. | `true` |
+| `mentionCheck` | boolean | Close pages whose address names a blocked site in its path, query or fragment (lists of similar sites, site statistics, domain marketplaces, downloaders). Checked against all block lists; explicitly allowed destinations are exempt. Default `false`. | `true` |
 
 **Order of checks.** For a tab URL, and for every page it wraps, innermost
 first, the extension checks these in turn:

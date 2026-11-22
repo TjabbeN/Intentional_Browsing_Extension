@@ -23,7 +23,8 @@ const MANAGED_TOGGLE_DEFAULTS = {
   blockExtensionsPage: false,
   scrubHistory: true,
   archiveOrgCheck: false,
-  pageCheck: false
+  pageCheck: false,
+  mentionCheck: false
 };
 
 // Translation tools often carry the source text in the URL hash or in
