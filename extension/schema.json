@@ -106,7 +106,7 @@
     },
     "pageCheck": {
       "title": "Check page labels, titles and descriptions",
-      "description": "Close pages that label themselves as adult content, and pages whose tab title or description matches keywordsAnywhere or keywordsSubstring. Explicitly allowed destinations are exempt. Default: false.",
+      "description": "Close pages that label themselves as adult content, and pages whose tab title, description, English or Dutch version, or Wikipedia categories match keywordsAnywhere or keywordsSubstring. Explicitly allowed destinations are exempt. Default: false.",
       "type": "boolean"
     }
   }
