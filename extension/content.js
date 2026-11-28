@@ -2,8 +2,8 @@
 //   - Delay overlay: visible-time countdown, then hold-to-continue (or a
 //     puzzle for soft triggers), grace period
 //   - archive.org item scan (only when the administrator enables it)
-//   - Page check: adult labels and descriptions (only when the administrator
-//     enables it)
+//   - Page check: adult labels, descriptions, other-language versions and
+//     categories (only when the administrator enables it)
 
 (() => {
   // The background re-injects this file into tabs that were open before the
@@ -55,8 +55,8 @@
   }
 
   // ─── Page check (only when the administrator enables pageCheck) ───────────
-  // Reports what the page says about itself in its <head>: adult-content
-  // labels, and its description texts. The background does the matching, with
+  // Reports what the page says about itself: adult-content labels, its
+  // description texts, its other-language versions and its categories. The background does the matching, with
   // the same keyword lists and exceptions as for URLs; the tab title is
   // checked there directly.
   const RTA_LABEL = 'rta-5042-1996-1400-1577-rta';
@@ -80,7 +80,46 @@
       }
       if (DESCRIPTION_KEYS.has(key)) texts.push(content.slice(0, 2000));
     }
+    texts.push(...otherLanguageTexts(), ...categoryTexts());
     return { adultLabel, texts };
+  }
+
+  // A page in any language usually links to its own versions in other
+  // languages (hreflang). The English and Dutch versions' titles and
+  // addresses are checked too, so the topic is recognised whatever language
+  // the page itself is in. The keyword lists are English and Dutch.
+  const VERSION_LANGUAGES = /^(?:en|nl)(?:-|$)/i;
+  const MAX_VERSION_LINKS = 20;
+
+  function otherLanguageTexts() {
+    const out = [];
+    const links = document.querySelectorAll('a[hreflang], link[rel~="alternate"][hreflang]');
+    for (const el of links) {
+      if (out.length >= MAX_VERSION_LINKS * 2) break;
+      if (!VERSION_LANGUAGES.test(el.getAttribute('hreflang') || '')) continue;
+      const title = (el.getAttribute('title') || '').trim();
+      if (title) out.push(title.slice(0, 300));
+      try {
+        const u = new URL(el.getAttribute('href') || '', location.href);
+        if (u.origin !== location.origin || u.pathname !== location.pathname) {
+          out.push(decodeURIComponent(u.pathname).slice(0, 300));
+        }
+      } catch {}
+    }
+    return out;
+  }
+
+  // Wikipedia lists the categories an article belongs to at its foot.
+  const MAX_CATEGORIES = 30;
+
+  function categoryTexts() {
+    const out = [];
+    for (const a of document.querySelectorAll('#catlinks li a')) {
+      if (out.length >= MAX_CATEGORIES) break;
+      const text = (a.textContent || '').trim();
+      if (text) out.push(text.slice(0, 200));
+    }
+    return out;
   }
 
   function startPageCheck() {

@@ -95,7 +95,7 @@ Changes apply immediately, without a browser restart.
 | `blockExtensionsPage` | boolean | Replace the extensions page with a locked page. Default `false`. | `true` |
 | `scrubHistory` | boolean | Delete closed pages from history. Default `true`. | `true` |
 | `archiveOrgCheck` | boolean | Close archive.org items that are flagged in their metadata (noindex, darkened, or an `archiveOrgTerms` match) or that show a content warning. Default `false`. | `true` |
-| `pageCheck` | boolean | Close pages that carry an adult-content label, or whose tab title or description matches `keywordsAnywhere` or `keywordsSubstring`. Default `false`. | `true` |
+| `pageCheck` | boolean | Close pages that carry an adult-content label, or whose tab title, description, English or Dutch version, or Wikipedia categories match `keywordsAnywhere` or `keywordsSubstring`. Default `false`. | `true` |
 | `mentionCheck` | boolean | Close pages whose address names a blocked site in its path, query or fragment (lists of similar sites, site statistics, domain marketplaces, downloaders). Checked against all block lists; explicitly allowed destinations are exempt. Default `false`. | `true` |
 
 **Order of checks.** For a tab URL, and for every page it wraps, innermost
@@ -115,7 +115,11 @@ it says about itself:
   tag such as `adult` or `mature`) closes the tab.
 - The tab title and the page description (`description`, Open Graph and
   Twitter title and description tags) are matched against `keywordsAnywhere`
-  and `keywordsSubstring`, the same way a URL is. Titles are checked again
+  and `keywordsSubstring`, the same way a URL is.
+- So are the titles and addresses of the page's English and Dutch versions
+  (the links a page in another language gives to its translations), and the
+  categories Wikipedia lists at the foot of an article. A page is recognised
+  by its topic whatever language it is in. Titles are checked again
   when they change, and the description when a single-page app rewrites it.
 - Explicitly allowed destinations are exempt.
 
@@ -226,7 +230,8 @@ Intentional Browsing does not collect, sell or transmit personal data.
 - All processing happens in the browser. Tab URLs are compared with local
   lists and are never sent anywhere.
 - Only when the administrator enables `pageCheck`: the tab title, the page's
-  description tags and its adult-content labels are read and compared with
+  description tags, the titles and addresses of its English and Dutch
+  versions, its Wikipedia categories and its adult-content labels are read and compared with
   the same local lists. They are not stored and never leave the browser.
 - An overlay background image you choose is stored in the browser's local
   extension storage only.

@@ -55,6 +55,33 @@ const s = r.signals()[0];
 t.expect('description, og:title and twitter:description collected; keywords and viewport not',
   s.adultLabel === false && JSON.stringify(s.texts) === JSON.stringify(['Daily news', 'Story', 'More']));
 
+t.section('other-language versions and categories');
+const wikiPage = (body) => `<!doctype html><html lang="it"><head><title>Voce - Wikipedia</title></head><body>${body}</body></html>`;
+r = runPage(wikiPage(`
+  <ul>
+    <li class="interlanguage-link"><a href="https://de.wikipedia.org/wiki/Beispiel" title="Beispiel – tedesco" lang="de" hreflang="de">Deutsch</a></li>
+    <li class="interlanguage-link"><a href="https://en.wikipedia.org/wiki/Example_topic" title="Example topic – inglese" lang="en" hreflang="en">English</a></li>
+    <li class="interlanguage-link"><a href="https://nl.wikipedia.org/wiki/Voorbeeld_onderwerp" title="Voorbeeld onderwerp – olandese" lang="nl" hreflang="nl">Nederlands</a></li>
+    <li class="interlanguage-link"><a href="https://fr.wikipedia.org/wiki/Exemple" title="Exemple – francese" lang="fr" hreflang="fr">Français</a></li>
+  </ul>
+  <div id="catlinks"><ul><li><a href="/wiki/Categoria:Uno">Categoria uno</a></li><li><a href="/wiki/Categoria:Due">Categoria due</a></li></ul></div>
+`), ON, 'https://it.wikipedia.org/wiki/Voce');
+let texts = r.signals()[0].texts;
+t.expect('English and Dutch titles collected', texts.includes('Example topic – inglese') && texts.includes('Voorbeeld onderwerp – olandese'));
+t.expect('their addresses collected', texts.includes('/wiki/Example_topic') && texts.includes('/wiki/Voorbeeld_onderwerp'));
+t.expect('other languages skipped', !texts.some((x) => /Beispiel|Exemple/.test(x)));
+t.expect('categories collected', texts.includes('Categoria uno') && texts.includes('Categoria due'));
+
+r = runPage(wikiPage(`<a href="/en/" hreflang="en-GB" title="English (UK)">EN</a>` +
+  Array.from({ length: 40 }, (_, i) => `<a href="https://en.example/p${i}" hreflang="en" title="T${i}">x</a>`).join('')),
+  ON, 'https://example.com/nl/');
+texts = r.signals()[0].texts;
+t.expect('regional codes like en-GB count as English', texts.includes('English (UK)'));
+t.expect(`version links capped (${texts.length} texts)`, texts.length <= 40);
+
+r = runPage(wikiPage(`<a href="/wiki/Voce" hreflang="en" title="Same page">EN</a>`), ON, 'https://it.wikipedia.org/wiki/Voce');
+t.expect('a link to the page itself adds only its title', JSON.stringify(r.signals()[0].texts) === JSON.stringify(['Same page']));
+
 t.section('when it runs');
 r = runPage(page('<meta name="description" content="x">'), { pageCheck: false, archiveScan: false });
 t.expect('nothing reported with pageCheck off', r.signals().length === 0);
